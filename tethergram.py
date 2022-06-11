@@ -68,7 +68,7 @@ class EtherAddressInfoProvider:
             self.blockData = self.w3.eth.get_block('latest')
 
 
-class TelegramBot:
+class TEtherBot:
     def __init__(self):
         self.heroku_token = config('HEROKU_TOKEN')
         self.updater = Updater(self.heroku_token, use_context=True)
@@ -95,13 +95,14 @@ class TelegramBot:
 
     def main(self):
         self.updater.dispatcher.add_handler(CommandHandler('start', self.start))
-        self.updater.dispatcher.add_handler(MessageHandler(Filters.all & ~Filters.command, self.textHandler, run_async=True))
-        self.updater.dispatcher.add_handler.add_handler(CommandHandler("help", help))
+        self.updater.dispatcher.add_handler(
+            MessageHandler(Filters.all & ~Filters.command, self.textHandler, run_async=True))
+        self.updater.dispatcher.add_handler(CommandHandler("help", help))
 
         self.updater.start_webhook(listen="0.0.0.0",
-                              port=int(os.environ.get('PORT', 8443)),
-                              url_path=self.heroku_token,
-                              webhook_url='https://yourherokuappname.herokuapp.com/' + self.heroku_token)
+                                   port=int(os.environ.get('PORT', 8443)),
+                                   url_path=self.heroku_token,
+                                   webhook_url='https://hidden-scrubland-39900.herokuapp.com/' + self.heroku_token)
         # Run the bot until you press Ctrl-C or the process receives SIGINT,
         # SIGTERM or SIGABRT. This should be used most of the time, since
         # start_polling() is non-blocking and will stop the bot gracefully.
@@ -109,8 +110,8 @@ class TelegramBot:
 
 
 if __name__ == '__main__':
-    TelegramBot()
-
+    tetherbot = TEtherBot()
+    tetherbot.main()
 
 # Example addresses
 # 0xbab815e5d14160140f2ae08d04c14571dfeddc7c
