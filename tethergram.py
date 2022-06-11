@@ -16,8 +16,7 @@ logger = logging.getLogger(__name__)
 class EtherAddressInfoProvider:
     def __init__(self):
         self.w3 = web3.Web3(
-            web3.Web3.WebsocketProvider("wss://eth-mainnet.alchemyapi.io/v2/" + config('ALCHEMY_API_KEY'),
-                                        websocket_timeout=60))
+            web3.Web3.WebsocketProvider("wss://eth-mainnet.alchemyapi.io/v2/" + os.environ.get('ALCHEMY_API_KEY')))
         self.abi_endpoint = 'https://api.etherscan.io/api?module=contract&action=getabi&address='
         self.error = None
 
@@ -38,7 +37,7 @@ class EtherAddressInfoProvider:
         # Get tx = w3.eth.get_transaction() Returns the transaction specified by transaction_hash
         self.addressData['EnsName'] = self.w3.ens.name(checkSumAddress)
         self.addressData['TxCount'] = self.w3.eth.get_transaction_count(checkSumAddress)
-        self.get_contract_info(checkSumAddress)
+        #self.get_contract_info(checkSumAddress)
 
     def get_contract_info(self, address):
         try:
@@ -70,9 +69,9 @@ class EtherAddressInfoProvider:
 
 class TEtherBot:
     def __init__(self):
-        self.heroku_token = config('HEROKU_TOKEN')
+        self.heroku_token = os.environ.get('HEROKU_TOKEN')
         self.updater = Updater(self.heroku_token, use_context=True)
-        self.EtherAddressInfoProvider = EtherAddressInfoProvider()
+        self.address_provider = EtherAddressInfoProvider()
 
     def start(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_text(text='Welcome to Ethereum address scraper!\nPlease provide an Ethereum address!')
@@ -87,16 +86,19 @@ class TEtherBot:
 
     def textHandler(self, update: Update, context: CallbackContext) -> None:
         user_message = str(update.message.text)
-        if not self.EtherAddressInfoProvider.w3.isAddress(user_message):
+        if not self.address_provider.w3.isAddress(user_message):
             logger.warning('Bad Ethereum address was given: "%s"', )
             return
 
         update.message.reply_text(text=f'Entered ETH address: {user_message}')
         update.message.reply_text(text=f'Fetching Ethereum address data, please wait...')
-        self.EtherAddressInfoProvider.get_eth_address_info(user_message)
-        update.message.reply_text(text=str(self.EtherAddressInfoProvider.addressData))
-
-
+        self.address_provider.get_eth_address_info(user_message)
+        update.message.reply_text(text=f'Address balance: '
+                                       f'{self.address_provider.addressData["Balance"]}')
+        update.message.reply_text(text=f'Address ENS name: '
+                                       f'{self.address_provider.addressData["EnsName"]}')
+        update.message.reply_text(text=f'Address tx count: '
+                                       f'{self.address_provider.addressData["TxCount"]}')
     def main(self):
         self.updater.dispatcher.add_handler(CommandHandler('start', self.start))
         self.updater.dispatcher.add_handler(
