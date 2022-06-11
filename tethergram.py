@@ -8,6 +8,10 @@ from telegram import *
 from telegram.ext import Updater, CommandHandler, CallbackContext, \
     MessageHandler, Filters
 
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 class EtherAddressInfoProvider:
     def __init__(self):
@@ -69,9 +73,6 @@ class TelegramBot:
         self.heroku_token = config('HEROKU_TOKEN')
         self.updater = Updater(self.heroku_token, use_context=True)
         self.EtherAddressInfoProvider = EtherAddressInfoProvider()
-        logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                            level=logging.INFO)
-        self.logger = logging.getLogger(__name__)
 
     def start(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_text(text='Welcome to Ethereum address scraper!\nPlease provide an Ethereum address!')
@@ -82,12 +83,12 @@ class TelegramBot:
 
     def error(self, update, context):
         """Log Errors caused by Updates."""
-        self.logger.warning('Update "%s" caused error "%s"', update, context.error)
+        logger.warning('Update "%s" caused error "%s"', update, context.error)
 
     def textHandler(self, update: Update, context: CallbackContext) -> None:
         user_message = str(update.message.text)
         if not self.EtherAddressInfoProvider.w3.isAddress(user_message):
-            print("ERR 0: Bad Ethereum address.")
+            logger.warning('Bad Ethereum address was given: "%s"', )
             return
 
         update.message.reply_text(text=f'Your eth address is: {user_message}')
@@ -98,9 +99,9 @@ class TelegramBot:
         self.updater.dispatcher.add_handler.add_handler(CommandHandler("help", help))
 
         self.updater.start_webhook(listen="0.0.0.0",
-                              port=int(os.environ.get('PORT', 5000)),
-                              url_path=self.heroku_token)
-        self.updater.bot.setWebhook('https://yourherokuappname.herokuapp.com/' + self.heroku_token)
+                              port=int(os.environ.get('PORT', 8443)),
+                              url_path=self.heroku_token,
+                              webhook_url='https://yourherokuappname.herokuapp.com/' + self.heroku_token)
         # Run the bot until you press Ctrl-C or the process receives SIGINT,
         # SIGTERM or SIGABRT. This should be used most of the time, since
         # start_polling() is non-blocking and will stop the bot gracefully.
@@ -109,6 +110,7 @@ class TelegramBot:
 
 if __name__ == '__main__':
     TelegramBot()
+
 
 # Example addresses
 # 0xbab815e5d14160140f2ae08d04c14571dfeddc7c
