@@ -91,7 +91,11 @@ class TEtherBot:
             logger.warning('Bad Ethereum address was given: "%s"', )
             return
 
-        update.message.reply_text(text=f'Your eth address is: {user_message}')
+        update.message.reply_text(text=f'Entered ETH address: {user_message}')
+        update.message.reply_text(text=f'Fetching Ethereum address data, please wait...')
+        self.EtherAddressInfoProvider.get_eth_address_info(user_message)
+        update.message.reply_text(text=str(self.EtherAddressInfoProvider.addressData))
+
 
     def main(self):
         self.updater.dispatcher.add_handler(CommandHandler('start', self.start))
