@@ -1,1 +1,3 @@
-# tethergram
+# Tethergram
+
+TetherGram provides information about Ethereum addresses and contracts. The bot uses the Web3 library and the Alchemy Web3 provider to query the Ethereum blockchain and retrieve information such as balance, transaction count, and contract details. The code also uses the Requests library to retrieve the ABI (Application Binary Interface) of contracts for the given Ethereum address. Additionally, the bot uses the python-telegram-bot library to handle the Telegram Bot API and interact with the users. The bot has a main menu that offers the options to query information about an Ethereum address or set up an alert for a specific address. The user's interactions with the bot are maintained through a state machine, where the bot transitions between different states based on the user's input.
